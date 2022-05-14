@@ -1,0 +1,175 @@
+<pre>
+
+
+<font color="#95a5a6">&#47;*THIS CODE IS FOR PROJECT GAS LEAK DETECTION SYSTEM WITH HELP OF GSM 800L *&#47;</font>
+
+
+<font color="#5e6d03">#include</font> <font color="#434f54">&lt;</font><b><font color="#d35400">SoftwareSerial</font></b><font color="#434f54">.</font><font color="#000000">h</font><font color="#434f54">&gt;</font>
+<font color="#5e6d03">#include</font> <font color="#434f54">&lt;</font><b><font color="#d35400">EEPROM</font></b><font color="#434f54">.</font><font color="#000000">h</font><font color="#434f54">&gt;</font>
+<b><font color="#d35400">SoftwareSerial</font></b> <font color="#000000">GSM800L</font><font color="#000000">(</font><font color="#000000">2</font><font color="#434f54">,</font><font color="#000000">3</font><font color="#000000">)</font><font color="#000000">;</font><font color="#95a5a6">&#47;*Add port name that your GSM connected through them to arduino*&#47;</font>
+<font color="#00979c">float</font> <font color="#000000">sensorValue</font><font color="#000000">;</font>
+<font color="#00979c">int</font> <font color="#000000">GasA0</font><font color="#434f54">=</font><font color="#000000">A0</font><font color="#000000">;</font> &nbsp;&nbsp;&nbsp;&nbsp;<font color="#95a5a6">&#47;*PIN NUMBER FOR SENSOR*&#47;</font>
+<font color="#00979c">int</font> <font color="#000000">Relay</font><font color="#434f54">=</font><font color="#000000">7</font> <font color="#000000">;</font> &nbsp;<font color="#95a5a6">&#47;*PIN NUMBER FOR LED WHICH IS USED INSTEAD OF SELONOID VALVE* registerPhone=009124434012; &nbsp;&nbsp;&nbsp;&#47;* USER PHONE NUMBER PARAMETER*&#47;</font>
+<font color="#00979c">String</font> <font color="#000000">registerPhone</font><font color="#434f54">=</font><font color="#005c5f">&#34;XXXXXXXXXXXXX&#34;</font><font color="#000000">;</font>
+<font color="#00979c">String</font> <font color="#000000">msg</font><font color="#434f54">=</font><font color="#005c5f">&#34;0&#34;</font><font color="#000000">;</font> &nbsp;&nbsp;&nbsp;<font color="#95a5a6">&#47;*PARAMETER RELATED TO RECICVED 1or 2 FROM USER WHICH MEAN CLOSE THE VALVE or do nothing*&#47;</font>
+<font color="#00979c">String</font> <font color="#000000">input</font><font color="#000000">;</font> <font color="#95a5a6">&#47;*PHONE NUMBER OF RECIEVIED SMS*&#47;</font>
+<font color="#00979c">int</font> <font color="#000000">LED</font><font color="#434f54">=</font><font color="#000000">13</font><font color="#000000">;</font>
+<font color="#00979c">boolean</font> <font color="#000000">number</font><font color="#000000">;</font>
+<font color="#00979c">void</font> <font color="#5e6d03">setup</font><font color="#000000">(</font><font color="#000000">)</font> <font color="#000000">{</font>
+ <b><font color="#d35400">Serial</font></b><font color="#434f54">.</font><font color="#d35400">begin</font><font color="#000000">(</font><font color="#000000">9600</font><font color="#000000">)</font><font color="#000000">;</font>
+ <font color="#d35400">pinMode</font><font color="#000000">(</font><font color="#000000">GasA0</font><font color="#434f54">,</font><font color="#00979c">INPUT</font><font color="#000000">)</font><font color="#000000">;</font>
+ <font color="#d35400">pinMode</font><font color="#000000">(</font><font color="#000000">Relay</font><font color="#434f54">,</font><font color="#00979c">OUTPUT</font><font color="#000000">)</font><font color="#000000">;</font>
+ <font color="#d35400">pinMode</font><font color="#000000">(</font><font color="#000000">LED</font><font color="#434f54">,</font><font color="#00979c">OUTPUT</font><font color="#000000">)</font><font color="#000000">;</font>
+
+
+
+ 
+<font color="#000000">}</font>
+
+<font color="#00979c">void</font> <font color="#5e6d03">loop</font><font color="#000000">(</font><font color="#000000">)</font> <font color="#000000">{</font>
+ <font color="#000000">writeStringIntoEEPROM</font><font color="#000000">(</font><font color="#000000">0</font><font color="#434f54">,</font><font color="#005c5f">&#34;registerPhone&#34;</font><font color="#000000">)</font><font color="#000000">;</font>
+ <font color="#00979c">float</font> <font color="#000000">sensorValue</font><font color="#434f54">=</font><font color="#d35400">analogRead</font><font color="#000000">(</font><font color="#000000">GasA0</font><font color="#000000">)</font><font color="#000000">;</font>
+ <font color="#d35400">delay</font> <font color="#000000">(</font><font color="#000000">150000</font><font color="#000000">)</font><font color="#000000">;</font> <font color="#95a5a6">&#47;*this line is for 2.5 minutes needed to sensor cycle completed*&#47;</font> 
+ <font color="#5e6d03">for</font> <font color="#000000">(</font><font color="#00979c">int</font> <font color="#000000">x</font><font color="#434f54">=</font><font color="#000000">1</font><font color="#000000">;</font><font color="#000000">x</font><font color="#434f54">&lt;</font><font color="#000000">10</font><font color="#000000">;</font><font color="#000000">x</font><font color="#434f54">++</font><font color="#000000">)</font>
+ <font color="#000000">{</font><font color="#000000">sensorValue</font><font color="#434f54">=</font><font color="#000000">sensorValue</font><font color="#434f54">+</font><font color="#d35400">analogRead</font><font color="#000000">(</font><font color="#000000">A0</font><font color="#000000">)</font><font color="#000000">;</font>
+ <font color="#000000">}</font>
+ <font color="#000000">sensorValue</font><font color="#434f54">=</font> <font color="#000000">sensorValue</font><font color="#434f54">&#47;</font><font color="#000000">10</font><font color="#000000">;</font>
+ <font color="#5e6d03">if</font> <font color="#000000">(</font><font color="#000000">sensorValue</font><font color="#434f54">&gt;=</font><font color="#000000">60</font><font color="#000000">)</font>
+ <font color="#000000">{</font>
+ &nbsp;<font color="#d35400">digitalWrite</font><font color="#000000">(</font><font color="#000000">LED</font><font color="#434f54">,</font><font color="#00979c">HIGH</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">SendTextMessage</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;<font color="#d35400">delay</font><font color="#000000">(</font><font color="#000000">300000</font><font color="#000000">)</font><font color="#000000">;</font><font color="#95a5a6">&#47;*wait if first message recipiant reply to sended message*&#47;</font>
+ &nbsp;<font color="#000000">GSM800L</font><font color="#434f54">.</font><font color="#d35400">print</font><font color="#000000">(</font><font color="#005c5f">&#34;AT+CNMI=2,2,0,0,0\r&#34;</font><font color="#000000">)</font><font color="#000000">;</font> <font color="#95a5a6">&#47;*set GSM module to recieve SMS*&#47;</font>
+ &nbsp;<font color="#d35400">delay</font><font color="#000000">(</font><font color="#000000">1000</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">parseData</font><font color="#000000">(</font><font color="#000000">GSM800L</font><font color="#434f54">.</font><font color="#d35400">readString</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">)</font><font color="#000000">;</font><font color="#95a5a6">&#47;*function for separating recived SMS data*&#47;</font>
+ &nbsp;<font color="#000000">writeStringIntoEEPROM</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">check</font><font color="#000000">;</font>
+ &nbsp;<font color="#5e6d03">if</font> <font color="#000000">(</font><font color="#000000">check</font><font color="#000000">(</font><font color="#000000">input</font><font color="#000000">)</font><font color="#434f54">&amp;&amp;</font><font color="#000000">msg</font><font color="#434f54">==</font><font color="#000000">1</font><font color="#000000">)</font><font color="#000000">{</font>
+ &nbsp;&nbsp;<font color="#d35400">delay</font><font color="#000000">(</font><font color="#000000">1000</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;&nbsp;&nbsp;<font color="#d35400">digitalWrite</font><font color="#000000">(</font><font color="#000000">Relay</font><font color="#434f54">,</font><font color="#00979c">HIGH</font><font color="#000000">)</font><font color="#000000">;</font><font color="#95a5a6">&#47;*HERE WE USE LED INSTEAD OF SELONOID VALVE IF LED TURNS ON IT MEANS VALVE IS CLOSED PER ORDER OF USER*&#47;</font>
+ &nbsp;<font color="#000000">}</font>
+ &nbsp;&nbsp;&nbsp;<font color="#5e6d03">if</font><font color="#000000">(</font><font color="#000000">number</font><font color="#434f54">==</font><font color="#00979c">false</font><font color="#000000">)</font><font color="#000000">{</font>
+ &nbsp;&nbsp;&nbsp;&nbsp;<font color="#000000">SendTextMessage2</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;&nbsp;&nbsp;<font color="#000000">}</font>
+ &nbsp;&nbsp;&nbsp;<font color="#5e6d03">if</font><font color="#000000">(</font><font color="#000000">msg</font><font color="#434f54">==</font><font color="#000000">2</font><font color="#000000">)</font><font color="#000000">{</font>
+ &nbsp;&nbsp;&nbsp;&nbsp;<font color="#000000">SendTextMessage3</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;&nbsp;&nbsp;<font color="#000000">}</font>
+ &nbsp;&nbsp;
+ &nbsp;&nbsp;&nbsp;&nbsp;<font color="#000000">}</font>
+ &nbsp;<font color="#5e6d03">if</font> <font color="#000000">(</font><font color="#000000">msg</font><font color="#434f54">==</font><font color="#000000">0</font><font color="#434f54">&amp;&amp;</font><font color="#000000">sensorValue</font><font color="#434f54">&gt;=</font><font color="#000000">60</font><font color="#000000">)</font><font color="#000000">{</font> <font color="#95a5a6">&#47;*if user doesnt answer the warning SMS, shut off main gas valve*&#47;</font>
+ &nbsp;&nbsp;&nbsp;&nbsp;<font color="#d35400">digitalWrite</font><font color="#000000">(</font><font color="#000000">Relay</font><font color="#434f54">,</font><font color="#00979c">HIGH</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;&nbsp;&nbsp;&nbsp;<font color="#000000">SendTextMessage4</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">}</font>
+ &nbsp;<font color="#000000">}</font>
+ 
+
+<font color="#00979c">void</font> <font color="#000000">SendTextMessage</font><font color="#000000">(</font><font color="#000000">)</font> <font color="#95a5a6">&#47;*the command to sending warning through SMS*&#47;</font>
+<font color="#000000">{</font>
+ &nbsp;<font color="#000000">GSM800L</font><font color="#434f54">.</font><font color="#d35400">println</font><font color="#000000">(</font><font color="#005c5f">&#34;AT+CMGF=1&#34;</font><font color="#000000">)</font><font color="#000000">;</font> <font color="#95a5a6">&#47;*set system to TEXT mode*&#47;</font> &nbsp;
+ &nbsp;<font color="#d35400">delay</font><font color="#000000">(</font><font color="#000000">1000</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">GSM800L</font><font color="#434f54">.</font><font color="#d35400">println</font><font color="#000000">(</font><font color="#005c5f">&#34;AT+CMGS=\&#34;registerPhone\&#34;\r&#34;</font><font color="#000000">)</font><font color="#000000">;</font> 
+ &nbsp;<font color="#d35400">delay</font><font color="#000000">(</font><font color="#000000">1000</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">GSM800L</font><font color="#434f54">.</font><font color="#d35400">println</font><font color="#000000">(</font><font color="#005c5f">&#34;Gas Leaking!&#34;</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;<font color="#d35400">delay</font><font color="#000000">(</font><font color="#000000">200</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">GSM800L</font><font color="#434f54">.</font><font color="#d35400">println</font><font color="#000000">(</font><font color="#005c5f">&#34;you can shutoff the main gas valve in your home by sending 1 to the system or if you want to handel problem manually send 2 to system&#34;</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;<font color="#d35400">delay</font><font color="#000000">(</font><font color="#000000">200</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">GSM800L</font><font color="#434f54">.</font><font color="#d35400">println</font><font color="#000000">(</font><font color="#005c5f">&#34;If you don&#39;t send 1 or 2 to system within 5 minutes, system automatically shutoff gas valve&#34;</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;<font color="#d35400">delay</font><font color="#000000">(</font><font color="#000000">200</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">GSM800L</font><font color="#434f54">.</font><font color="#d35400">println</font><font color="#000000">(</font><font color="#000000">(</font><font color="#00979c">char</font><font color="#000000">)</font><font color="#000000">26</font><font color="#000000">)</font><font color="#000000">;</font><font color="#434f54">&#47;&#47;the stopping character</font>
+ &nbsp;<font color="#d35400">delay</font><font color="#000000">(</font><font color="#000000">1000</font><font color="#000000">)</font><font color="#000000">;</font>
+<font color="#000000">}</font>
+ &nbsp;<font color="#00979c">void</font> <font color="#000000">parseData</font><font color="#000000">(</font><font color="#00979c">String</font> <font color="#000000">buff</font><font color="#000000">)</font><font color="#000000">{</font>
+ &nbsp;&nbsp;&nbsp;<b><font color="#d35400">Serial</font></b><font color="#434f54">.</font><font color="#d35400">println</font><font color="#000000">(</font><font color="#000000">buff</font><font color="#000000">)</font><font color="#000000">;</font>
+
+ &nbsp;<font color="#00979c">unsigned</font> <font color="#00979c">int</font> <font color="#000000">index</font><font color="#000000">;</font>
+
+ &nbsp;<font color="#434f54">&#47;&#47;Remove sent &#34;AT Command&#34; from the response string.</font>
+ &nbsp;<font color="#000000">index</font> <font color="#434f54">=</font> <font color="#000000">buff</font><font color="#434f54">.</font><font color="#d35400">indexOf</font><font color="#000000">(</font><font color="#005c5f">&#34;\r&#34;</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">buff</font><font color="#434f54">.</font><font color="#d35400">remove</font><font color="#000000">(</font><font color="#000000">0</font><font color="#434f54">,</font> <font color="#000000">index</font> <font color="#434f54">+</font> <font color="#000000">2</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">buff</font><font color="#434f54">.</font><font color="#d35400">trim</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">;</font>
+
+ &nbsp;<font color="#5e6d03">if</font> <font color="#000000">(</font><font color="#000000">buff</font> <font color="#434f54">!=</font> <font color="#005c5f">&#34;OK&#34;</font><font color="#000000">)</font> <font color="#000000">{</font>
+ &nbsp;&nbsp;&nbsp;<font color="#000000">index</font> <font color="#434f54">=</font> <font color="#000000">buff</font><font color="#434f54">.</font><font color="#d35400">indexOf</font><font color="#000000">(</font><font color="#005c5f">&#34;:&#34;</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;&nbsp;&nbsp;<font color="#00979c">String</font> <font color="#000000">cmd</font> <font color="#434f54">=</font> <font color="#000000">buff</font><font color="#434f54">.</font><font color="#d35400">substring</font><font color="#000000">(</font><font color="#000000">0</font><font color="#434f54">,</font> <font color="#000000">index</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;&nbsp;&nbsp;<font color="#000000">cmd</font><font color="#434f54">.</font><font color="#d35400">trim</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">;</font>
+
+ &nbsp;&nbsp;&nbsp;<font color="#000000">buff</font><font color="#434f54">.</font><font color="#d35400">remove</font><font color="#000000">(</font><font color="#000000">0</font><font color="#434f54">,</font> <font color="#000000">index</font> <font color="#434f54">+</font> <font color="#000000">2</font><font color="#000000">)</font><font color="#000000">;</font>
+
+ &nbsp;&nbsp;&nbsp;<font color="#434f54">&#47;&#47;Parse necessary message from SIM800L Serial buffer string</font>
+ &nbsp;&nbsp;&nbsp;<font color="#5e6d03">if</font> <font color="#000000">(</font><font color="#000000">cmd</font> <font color="#434f54">==</font> <font color="#005c5f">&#34;+CMT&#34;</font><font color="#000000">)</font> <font color="#000000">{</font>
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#434f54">&#47;&#47;get newly arrived memory location and store it in temp</font>
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#000000">index</font> <font color="#434f54">=</font> <font color="#000000">buff</font><font color="#434f54">.</font><font color="#d35400">lastIndexOf</font><font color="#000000">(</font><font color="#000000">0x0D</font><font color="#000000">)</font><font color="#000000">;</font><font color="#434f54">&#47;&#47;Looking for position of CR(Carriage Return)</font>
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#000000">msg</font> <font color="#434f54">=</font> <font color="#000000">buff</font><font color="#434f54">.</font><font color="#d35400">substring</font><font color="#000000">(</font><font color="#000000">index</font> <font color="#434f54">+</font> <font color="#000000">2</font><font color="#434f54">,</font> <font color="#000000">buff</font><font color="#434f54">.</font><font color="#d35400">length</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">)</font><font color="#000000">;</font><font color="#434f54">&#47;&#47;Writes message to variable &#34;msg&#34;</font>
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#000000">msg</font><font color="#434f54">.</font><font color="#d35400">toLowerCase</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">;</font><font color="#434f54">&#47;&#47;Whole message gets changed to lower case</font>
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b><font color="#d35400">Serial</font></b><font color="#434f54">.</font><font color="#d35400">println</font><font color="#000000">(</font><font color="#000000">msg</font><font color="#000000">)</font><font color="#000000">;</font>
+
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#000000">index</font> <font color="#434f54">=</font> <font color="#000000">buff</font><font color="#434f54">.</font><font color="#d35400">indexOf</font><font color="#000000">(</font><font color="#000000">0x22</font><font color="#000000">)</font><font color="#000000">;</font><font color="#434f54">&#47;&#47;Looking for position of first double quotes-&gt; &#34;</font>
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#000000">input</font> <font color="#434f54">=</font> <font color="#000000">buff</font><font color="#434f54">.</font><font color="#d35400">substring</font><font color="#000000">(</font><font color="#000000">index</font> <font color="#434f54">+</font> <font color="#000000">1</font><font color="#434f54">,</font> <font color="#000000">index</font> <font color="#434f54">+</font> <font color="#000000">14</font><font color="#000000">)</font><font color="#000000">;</font> <font color="#434f54">&#47;&#47;Writes phone number to variable &#34;input&#34;</font>
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b><font color="#d35400">Serial</font></b><font color="#434f54">.</font><font color="#d35400">println</font><font color="#000000">(</font><font color="#000000">registerPhone</font><font color="#000000">)</font><font color="#000000">;</font>
+
+ &nbsp;&nbsp;&nbsp;<font color="#000000">}</font>
+ &nbsp;<font color="#000000">}</font>
+ &nbsp;<font color="#000000">}</font>
+ &nbsp;
+ &nbsp;<font color="#00979c">void</font> <font color="#000000">writeStringIntoEEPROM</font><font color="#000000">(</font><font color="#00979c">int</font> <font color="#000000">address</font><font color="#434f54">,</font><font color="#00979c">String</font> <font color="#000000">str</font><font color="#000000">)</font><font color="#000000">{</font>
+ &nbsp;<font color="#00979c">byte</font> <font color="#000000">len</font><font color="#434f54">=</font> <font color="#000000">str</font><font color="#434f54">.</font><font color="#d35400">length</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;<b><font color="#d35400">EEPROM</font></b><font color="#434f54">.</font><font color="#d35400">write</font><font color="#000000">(</font><font color="#000000">address</font><font color="#434f54">,</font><font color="#000000">len</font><font color="#000000">)</font><font color="#000000">;</font>
+
+ &nbsp;<font color="#5e6d03">for</font><font color="#000000">(</font><font color="#00979c">int</font> <font color="#000000">i</font><font color="#434f54">=</font><font color="#000000">0</font><font color="#000000">;</font> <font color="#000000">i</font><font color="#434f54">&lt;</font><font color="#000000">len</font><font color="#000000">;</font> <font color="#000000">i</font><font color="#434f54">++</font><font color="#000000">)</font><font color="#000000">{</font>
+ &nbsp;&nbsp;&nbsp;<b><font color="#d35400">EEPROM</font></b><font color="#434f54">.</font><font color="#d35400">write</font><font color="#000000">(</font><font color="#000000">address</font><font color="#434f54">+</font><font color="#000000">1</font><font color="#434f54">+</font><font color="#000000">i</font><font color="#434f54">,</font><font color="#000000">str</font><font color="#000000">[</font><font color="#000000">i</font><font color="#000000">]</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">}</font>
+<font color="#000000">}</font>
+<font color="#00979c">String</font> <font color="#000000">readStringFromEEPROM</font><font color="#000000">(</font><font color="#00979c">int</font> <font color="#000000">address</font><font color="#000000">)</font><font color="#000000">{</font>
+ &nbsp;<font color="#00979c">int</font> <font color="#000000">len</font><font color="#434f54">=</font><b><font color="#d35400">EEPROM</font></b><font color="#434f54">.</font><font color="#d35400">read</font><font color="#000000">(</font><font color="#000000">address</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;<font color="#00979c">char</font> <font color="#000000">data</font><font color="#000000">[</font><font color="#000000">len</font><font color="#434f54">+</font><font color="#000000">1</font><font color="#000000">]</font><font color="#000000">;</font>
+
+ <font color="#5e6d03">for</font><font color="#000000">(</font><font color="#00979c">int</font> <font color="#000000">i</font><font color="#434f54">=</font><font color="#000000">0</font><font color="#000000">;</font><font color="#000000">i</font><font color="#434f54">&lt;</font><font color="#000000">len</font><font color="#000000">;</font><font color="#000000">i</font><font color="#434f54">++</font><font color="#000000">)</font><font color="#000000">{</font>
+ &nbsp;<font color="#000000">data</font><font color="#000000">[</font><font color="#000000">i</font><font color="#000000">]</font><font color="#434f54">=</font><b><font color="#d35400">EEPROM</font></b><font color="#434f54">.</font><font color="#d35400">read</font><font color="#000000">(</font><font color="#000000">address</font><font color="#434f54">+</font><font color="#000000">1</font><font color="#434f54">+</font><font color="#000000">i</font><font color="#000000">)</font><font color="#000000">;</font>
+ <font color="#000000">}</font>
+ <font color="#434f54">&#47;&#47;data[len]=&#39;\0&#39;;&#47;&#47;</font>
+ <font color="#5e6d03">return</font> <font color="#00979c">String</font><font color="#000000">(</font><font color="#000000">data</font><font color="#000000">)</font><font color="#000000">;</font>
+<font color="#000000">}</font>
+
+ &nbsp;<font color="#00979c">void</font> <font color="#000000">SendTextMessage2</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">{</font>
+ &nbsp;&nbsp;&nbsp;<font color="#000000">GSM800L</font><font color="#434f54">.</font><font color="#d35400">println</font><font color="#000000">(</font><font color="#005c5f">&#34;AT+CMGF=1&#34;</font><font color="#000000">)</font><font color="#000000">;</font> &nbsp;&nbsp;
+ &nbsp;<font color="#d35400">delay</font><font color="#000000">(</font><font color="#000000">1000</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">GSM800L</font><font color="#434f54">.</font><font color="#d35400">println</font><font color="#000000">(</font><font color="#005c5f">&#34;AT+CMGS=\&#34;registerPhone\&#34;\r&#34;</font><font color="#000000">)</font><font color="#000000">;</font> 
+ &nbsp;<font color="#d35400">delay</font><font color="#000000">(</font><font color="#000000">1000</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">GSM800L</font><font color="#434f54">.</font><font color="#d35400">println</font><font color="#000000">(</font><font color="#005c5f">&#34;Unauthorized User Sending Command To System!&#34;</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;<font color="#d35400">delay</font><font color="#000000">(</font><font color="#000000">200</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">GSM800L</font><font color="#434f54">.</font><font color="#d35400">println</font><font color="#000000">(</font><font color="#000000">(</font><font color="#00979c">char</font><font color="#000000">)</font><font color="#000000">26</font><font color="#000000">)</font><font color="#000000">;</font><font color="#434f54">&#47;&#47;the stopping character</font>
+ &nbsp;<font color="#d35400">delay</font><font color="#000000">(</font><font color="#000000">1000</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">}</font>
+ &nbsp;
+ &nbsp;<font color="#00979c">void</font> <font color="#000000">SendTextMessage3</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">{</font>
+ &nbsp;&nbsp;&nbsp;<font color="#000000">GSM800L</font><font color="#434f54">.</font><font color="#d35400">println</font><font color="#000000">(</font><font color="#005c5f">&#34;AT+CMGF=1&#34;</font><font color="#000000">)</font><font color="#000000">;</font> &nbsp;&nbsp;
+ &nbsp;<font color="#d35400">delay</font><font color="#000000">(</font><font color="#000000">1000</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">GSM800L</font><font color="#434f54">.</font><font color="#d35400">println</font><font color="#000000">(</font><font color="#005c5f">&#34;AT+CMGS=\&#34;registerPhone\&#34;\r&#34;</font><font color="#000000">)</font><font color="#000000">;</font> 
+ &nbsp;<font color="#d35400">delay</font><font color="#000000">(</font><font color="#000000">1000</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">GSM800L</font><font color="#434f54">.</font><font color="#d35400">println</font><font color="#000000">(</font><font color="#005c5f">&#34;As User Orderd, System Does not Shutoff main gas valve&#34;</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;<font color="#d35400">delay</font><font color="#000000">(</font><font color="#000000">200</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">GSM800L</font><font color="#434f54">.</font><font color="#d35400">println</font><font color="#000000">(</font><font color="#000000">(</font><font color="#00979c">char</font><font color="#000000">)</font><font color="#000000">26</font><font color="#000000">)</font><font color="#000000">;</font><font color="#434f54">&#47;&#47;the stopping character</font>
+ &nbsp;<font color="#d35400">delay</font><font color="#000000">(</font><font color="#000000">1000</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">}</font>
+
+<font color="#00979c">void</font> <font color="#000000">SendTextMessage4</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">{</font>
+ &nbsp;<font color="#000000">GSM800L</font><font color="#434f54">.</font><font color="#d35400">println</font><font color="#000000">(</font><font color="#005c5f">&#34;AT+CMGF=1&#34;</font><font color="#000000">)</font><font color="#000000">;</font> &nbsp;&nbsp;
+ &nbsp;<font color="#d35400">delay</font><font color="#000000">(</font><font color="#000000">1000</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">GSM800L</font><font color="#434f54">.</font><font color="#d35400">println</font><font color="#000000">(</font><font color="#005c5f">&#34;AT+CMGS=\&#34;registerPhone\&#34;\r&#34;</font><font color="#000000">)</font><font color="#000000">;</font> 
+ &nbsp;<font color="#d35400">delay</font><font color="#000000">(</font><font color="#000000">1000</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">GSM800L</font><font color="#434f54">.</font><font color="#d35400">println</font><font color="#000000">(</font><font color="#005c5f">&#34;As User didnt answer the warning SMS, system Shutoff main gas valve as precutionary measure&#34;</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;<font color="#d35400">delay</font><font color="#000000">(</font><font color="#000000">200</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">GSM800L</font><font color="#434f54">.</font><font color="#d35400">println</font><font color="#000000">(</font><font color="#000000">(</font><font color="#00979c">char</font><font color="#000000">)</font><font color="#000000">26</font><font color="#000000">)</font><font color="#000000">;</font><font color="#434f54">&#47;&#47;the stopping character</font>
+ &nbsp;<font color="#d35400">delay</font><font color="#000000">(</font><font color="#000000">1000</font><font color="#000000">)</font><font color="#000000">;</font>
+ <font color="#000000">}</font>
+ &nbsp;&nbsp;&nbsp;<font color="#00979c">boolean</font> <font color="#000000">check</font><font color="#000000">(</font><font color="#00979c">String</font> <font color="#000000">registerPhone</font><font color="#000000">)</font><font color="#000000">{</font>
+ &nbsp;<font color="#00979c">String</font> <font color="#000000">phoneNo</font><font color="#000000">;</font>
+ &nbsp;<font color="#00979c">boolean</font> <font color="#000000">flag</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">phoneNo</font> <font color="#434f54">=</font> <b><font color="#d35400">EEPROM</font></b><font color="#434f54">.</font><font color="#d35400">read</font><font color="#000000">(</font><font color="#000000">0</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;<font color="#5e6d03">if</font><font color="#000000">(</font><font color="#000000">phoneNo</font> <font color="#434f54">==</font> <font color="#000000">registerPhone</font><font color="#000000">)</font>
+ &nbsp;&nbsp;&nbsp;&nbsp;<font color="#000000">flag</font><font color="#434f54">=</font><font color="#000000">1</font><font color="#000000">;</font>
+ &nbsp;&nbsp;<font color="#5e6d03">else</font>
+ &nbsp;&nbsp;&nbsp;&nbsp;<font color="#000000">flag</font><font color="#434f54">=</font><font color="#000000">0</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">}</font>
+
+</pre>
